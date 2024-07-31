@@ -23,6 +23,8 @@ use log::{Level, Log, Record};
 /// The list of captured logs.
 static LOGS: RwLock<Vec<CapturedLog>> = RwLock::new(Vec::new());
 
+static INIT: std::sync::Once = std::sync::Once::new();
+
 /// The logger
 pub struct LogTester;
 
@@ -49,7 +51,7 @@ impl LogTester {
     /// LogTester::start();
     /// ```
     pub fn start() {
-        log::set_logger(&LogTester).expect("Failed to start the logger");
+        INIT.call_once(|| log::set_logger(&LogTester).expect("Failed to start the logger"));
         log::set_max_level(log::LevelFilter::Trace);
     }
 

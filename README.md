@@ -6,6 +6,15 @@
 
 **log_tester** is a crate that takes care of capturing log messages produced by the [`log`](https://docs.rs/log) crate during test, and then perform checks on them.
 
+## Warnings
+
+This crate is made to capture all logs, including in multithreaded case.
+Hence, it does not work well with `cargo test`, the logs from all test will be captured.
+
+It is better to use `cargo nextest` instead.
+
+Using `cargo test` will not fail but additional logs will be captured. In that way the test may not be right.
+
 ## Usage
 
 This crate is intend to be used in conjunction with the [`log`](https://docs.rs/log)
@@ -19,7 +28,7 @@ log = "0.4"
 log_tester = "0.1"
 ```
 
-```rust, ignore
+```rust
 use log_tester::LogTester;
 use log::Level;
 
