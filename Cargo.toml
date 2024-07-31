@@ -1,0 +1,14 @@
+[package]
+name = "log_tester"
+description = "Test for log messages produced by the log crate"
+authors = ["Ultraxime <36888699+Ultraxime@users.noreply.github.com>"]
+version = "0.1.0"
+readme = "README.md"
+repository = "https://github.com/ultraxime/log-tester"
+license = "GPL-3.0-only"
+edition = "2021"
+categories = ["development-tools::testing"]
+keywords = ["log", "testing", "logging"]
+
+[dependencies]
+log = { version = "0.4", features = ["std"] }

@@ -1,0 +1,5 @@
+/target
+
+./vscode
+lcov.info
+coverage_report
