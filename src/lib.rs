@@ -29,6 +29,7 @@ static INIT: std::sync::Once = std::sync::Once::new();
 pub struct LogTester;
 
 /// A log that was captured
+#[derive(Debug)]
 pub struct CapturedLog {
     /// The formatted log message.
     pub body: String,
@@ -91,11 +92,56 @@ impl LogTester {
     /// log::info!("Hello, world!");
     /// assert_eq!(LogTester::len(), 1);
     /// ```
-    #[allow(dead_code)]
     pub fn len() -> usize {
         LOGS.read()
             .expect("Failed to get the read lock on the logs")
             .len()
+    }
+
+    /// Clears the captured logs
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use log_tester::LogTester;
+    /// use log;
+    ///
+    /// LogTester::start();
+    /// log::info!("Hello, world!");
+    /// LogTester::clear();
+    /// assert_eq!(LogTester::len(), 0);
+    /// ```
+    pub fn clear() {
+        LOGS.write()
+            .expect("Failed to get the write lock on the logs")
+            .clear();
+    }
+}
+
+impl std::fmt::Display for CapturedLog {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.body)
+    }
+}
+
+impl std::fmt::Debug for LogTester {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let logs = LOGS
+            .read()
+            .expect("Failed to get the read lock on the logs");
+        write!(f, "{:?}", logs)
+    }
+}
+
+impl std::fmt::Display for LogTester {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let logs = LOGS
+            .read()
+            .expect("Failed to get the read lock on the logs");
+        for log in logs.iter() {
+            writeln!(f, "{}", log)?;
+        }
+        Ok(())
     }
 }
 
@@ -159,5 +205,48 @@ mod tests {
     fn test_flush() {
         LogTester::start();
         log::logger().flush();
+    }
+
+    #[test]
+    fn test_clear() {
+        LogTester::start();
+        trace!("trace");
+        debug!("debug");
+        info!("info");
+        warn!("warn");
+        error!("error");
+        assert_eq!(LogTester::len(), 5);
+        LogTester::clear();
+        assert_eq!(LogTester::len(), 0);
+    }
+
+    #[test]
+    fn test_display() {
+        LogTester::start();
+        trace!("trace");
+        debug!("debug");
+        info!("info");
+        warn!("warn");
+        error!("error");
+        assert!(format!("{}", LogTester).contains("trace"));
+        assert!(format!("{}", LogTester).contains("debug"));
+        assert!(format!("{}", LogTester).contains("info"));
+        assert!(format!("{}", LogTester).contains("warn"));
+        assert!(format!("{}", LogTester).contains("error"));
+    }
+
+    #[test]
+    fn test_debug() {
+        LogTester::start();
+        trace!("trace");
+        debug!("debug");
+        info!("info");
+        warn!("warn");
+        error!("error");
+        assert!(format!("{:?}", LogTester).contains("trace"));
+        assert!(format!("{:?}", LogTester).contains("debug"));
+        assert!(format!("{:?}", LogTester).contains("info"));
+        assert!(format!("{:?}", LogTester).contains("warn"));
+        assert!(format!("{:?}", LogTester).contains("error"));
     }
 }
